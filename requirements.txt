@@ -1,0 +1,13 @@
+cirq==1.6.1
+galois==0.4.6
+ldpc==2.3.8
+matplotlib==3.10.5
+networkx==3.5
+numpy==1.26.4
+parse==1.20.2
+PyMatching==2.3.0
+qLDPC==0.2.6
+sinter==1.15.0
+stim==1.15.0
+sympy==1.14.0
+z3-solver==4.15.1.0
