@@ -50,3 +50,11 @@ prop_hunt python idle_sensitivity.py
 
 docker run --platform linux/amd64 -w ${CONTAINER_PATH}/scripts -v $LOCAL_MOUNT:$DOCKER_MOUNT \
 prop_hunt python scaling_data.py
+
+# Hook ZNE Evaluation
+
+docker run --platform linux/amd64 -w ${CONTAINER_PATH}/scripts -v $LOCAL_MOUNT:$DOCKER_MOUNT \
+prop_hunt python zne_experiments.py
+
+docker run --platform linux/amd64 -w ${CONTAINER_PATH}/scripts -v $LOCAL_MOUNT:$DOCKER_MOUNT \
+prop_hunt python process_zne_data.py

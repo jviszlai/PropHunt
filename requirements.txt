@@ -3,6 +3,7 @@ Cython==3.2.2
 galois==0.4.6
 ldpc @ git+https://github.com/quantumgizmos/ldpc.git
 matplotlib==3.10.5
+mitiq==0.48.1
 networkx==3.5
 numpy==1.26.4
 parse==1.20.2
@@ -13,4 +14,5 @@ sinter==1.15.0
 stim==1.15.0
 stim-surface-code @ git+https://github.com/jasonchadwick/stim_surface_code@4d1d9eb00be746cce0500fd911a8c2f04d185fda
 sympy==1.14.0
+tqdm==4.67.1
 z3-solver==4.15.1.0

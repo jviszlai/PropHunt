@@ -151,9 +151,9 @@ idle_strength_range = [3e-8, 7e-8, 3e-7, 7e-7, 3e-6, 7e-6, 3e-5, 7e-5, 3e-4, 7e-
 fig, axes = plt.subplots(5, 1, sharex=True, figsize=(13, 11), height_ratios=[4, 1, 1, 1, 1])
 
 for ax in axes:
-    ax.axvline(300e-9 / 10, linestyle='dashed', color='black')
-    ax.axvline(1e-3 / 10, linestyle='dashed', color='black')
-    ax.axvline(36e-9 / 80e-6, linestyle='dashed', color='black')
+    ax.axvline(300e-9 / 10, linestyle='dashed', color='black') # 300 ns gate, 10 s coherence
+    ax.axvline(1e-3 / 10, linestyle='dashed', color='black') # 1 ms gate, 10 s coherence
+    ax.axvline(36e-9 / 80e-6, linestyle='dashed', color='black') # 36 ns gate, 80 us coherence
 
 axes[0].text(200e-9 / 10, 3e-2, 'Neutral Atoms')
 axes[0].text(7e-5 / 10, 3e-2, 'Neutral Atoms with Movement')
@@ -187,3 +187,29 @@ fig.suptitle('Idle Sensitivity Study', y=0.92, fontsize=16)
 
 
 plt.savefig('figures/idle_sensitivity.pdf', bbox_inches='tight')
+
+plt.figure()
+
+zne_data = pkl.load(open('data/zne/zne_expectation_data.pkl', 'rb'))
+
+d_range = [13, 11, 9]
+
+for i in range(3):
+    if i == 0:
+        bar_container = plt.bar(i - 0.2, abs(1 - zne_data['baseline'][0][i]), 0.4, align='center', color='tab:blue', hatch='//', label='DS-ZNE')
+    else:
+        bar_container = plt.bar(i - 0.2, abs(1 - zne_data['baseline'][0][i]), 0.4, align='center', color='tab:blue', hatch='//')
+    plt.bar_label(bar_container, fmt='{:.3f}')
+for i in range(3):
+    if i == 0:
+        bar_container = plt.bar(i + 0.2, abs(1 - zne_data['hook'][0][i]), 0.4, align='center', color='tab:orange', hatch='\\\\', label='Hook-ZNE')
+    else:
+        bar_container = plt.bar(i + 0.2, abs(1 - zne_data['hook'][0][i]), 0.4, align='center', color='tab:orange', hatch='\\\\')
+    plt.bar_label(bar_container, fmt='{:.3f}')
+plt.xticks([0, 1, 2], [13, 11, 9])
+plt.xlabel('Maximum Code Distance')
+plt.ylabel('Error in Estimated Expection \n (L1-norm)')
+plt.legend(loc='upper left')
+plt.grid(which='major', axis='y')
+
+plt.savefig('figures/zne_expectations.pdf', bbox_inches='tight')
