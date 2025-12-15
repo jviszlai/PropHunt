@@ -27,7 +27,7 @@ if __name__ == '__main__':
         ambiguous_errors, solve_times =  error_sampler(graphs[0], d, 25, 1, return_solve_times=True)
         start_time = time.time()
         try:
-            logical_error_indices = get_ambiguous_error(graphs[0], timeout=30)
+            logical_error_indices = get_ambiguous_error(graphs[0], timeout=1800)
         except TypeError:
             logical_error_indices = [] # Indicates timeout
         end_time = time.time()

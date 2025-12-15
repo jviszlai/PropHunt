@@ -1,7 +1,6 @@
 import numpy as np
 import pickle as pkl
 import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
 from matplotlib.colors import to_rgba
 
 import sys
@@ -125,8 +124,6 @@ for (name, d) in benchmarks:
         axes[idx_0][idx_1].plot(p_range, opt_data_lookup[(name, d)], marker='s',markersize=8, markerfacecolor='none', linewidth=0.5, markeredgewidth=1.5, color='tab:blue', label='Hand-Designed Circuit')
     axes[idx_0][idx_1].set_title(benchmark_name_lookup[(name, d)])
     axes[idx_0][idx_1].loglog()
-    #plt.ylabel('Logical Error Rate per Round')
-    #plt.xlabel('Physical Error Rate')
     i += 1
 axes[0, 3].legend(loc='lower left', bbox_to_anchor=(1.1, -1.1))
 plt.suptitle('QEC Code Benchmark Performance', y=1.02, fontsize=14)

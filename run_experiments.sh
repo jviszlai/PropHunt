@@ -18,28 +18,28 @@ prop_hunt python intro_data.py
 # PropHunt Evaluation
 
 docker run --platform linux/amd64 -w ${CONTAINER_PATH}/scripts -v $LOCAL_MOUNT:$DOCKER_MOUNT \
-prop_hunt python prophunt_experiment.py surface 3 100 $NUM_CORES
+prop_hunt python prophunt_experiment.py surface 3 100 5 $NUM_CORES
 
 docker run --platform linux/amd64 -w ${CONTAINER_PATH}/scripts -v $LOCAL_MOUNT:$DOCKER_MOUNT \
-prop_hunt python prophunt_experiment.py surface 5 100 $NUM_CORES
+prop_hunt python prophunt_experiment.py surface 5 100 5 $NUM_CORES
 
 docker run --platform linux/amd64 -w ${CONTAINER_PATH}/scripts -v $LOCAL_MOUNT:$DOCKER_MOUNT \
-prop_hunt python prophunt_experiment.py surface 7 250 $NUM_CORES
+prop_hunt python prophunt_experiment.py surface 7 250 9 $NUM_CORES
 
 docker run --platform linux/amd64 -w ${CONTAINER_PATH}/scripts -v $LOCAL_MOUNT:$DOCKER_MOUNT \
-prop_hunt python prophunt_experiment.py surface 9 300 $NUM_CORES
+prop_hunt python prophunt_experiment.py surface 9 300 16 $NUM_CORES
 
 docker run --platform linux/amd64 -w ${CONTAINER_PATH}/scripts -v $LOCAL_MOUNT:$DOCKER_MOUNT \
-prop_hunt python prophunt_experiment.py lp 3 150 $NUM_CORES
+prop_hunt python prophunt_experiment.py lp 3 150 5 $NUM_CORES
 
 docker run --platform linux/amd64 -w ${CONTAINER_PATH}/scripts -v $LOCAL_MOUNT:$DOCKER_MOUNT \
-prop_hunt python prophunt_experiment.py rqt 6 300 $NUM_CORES
+prop_hunt python prophunt_experiment.py rqt 6 300 5 $NUM_CORES
 
 docker run --platform linux/amd64 -w ${CONTAINER_PATH}/scripts -v $LOCAL_MOUNT:$DOCKER_MOUNT \
-prop_hunt python prophunt_experiment.py rqt_di_156 4 200 $NUM_CORES
+prop_hunt python prophunt_experiment.py rqt_di_156 4 200 5 $NUM_CORES
 
 docker run --platform linux/amd64 -w ${CONTAINER_PATH}/scripts -v $LOCAL_MOUNT:$DOCKER_MOUNT \
-prop_hunt python prophunt_experiment.py rqt_di_8020 4 200 $NUM_CORES
+prop_hunt python prophunt_experiment.py rqt_di_8020 4 200 16 $NUM_CORES
 
 # Idle Sensitivity
 

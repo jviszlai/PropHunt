@@ -15,13 +15,15 @@ from prop_hunt.prop_hunt import PropHuntCompiler
 '''
 Example parameters:
 samples: 500
+iterations: 10
 num_workers: 36
 '''
 if __name__ == '__main__':
     code_type = str(sys.argv[1])
     d = int(sys.argv[2])
     samples = int(sys.argv[3])
-    num_workers = int(sys.argv[4])
+    max_iter = int(sys.argv[4])
+    num_workers = int(sys.argv[5])
 
     benchmark_codes = pkl.load(open('benchmark_codes.pkl', 'rb'))
 
@@ -33,18 +35,6 @@ if __name__ == '__main__':
     if (code_type, d) not in benchmark_codes:
         raise NotImplementedError('Code type not supported')
     
-    max_iters = {
-        ('lp', 3): 5,
-        ('rqt', 6): 5,
-        ('rqt_di_54', 4): 9,
-        ('rqt_di_108', 4): 16,
-        ('surface', 3): 5,
-        ('surface', 5): 5,
-        ('surface', 7): 5,
-        ('surface', 9): 16,
-    }
-    max_iter = max_iters[(code_type, d)]
-
     os.makedirs(f'data/{code_type}/d_{d}', exist_ok=True)
     log_path = f'data/{code_type}/d_{d}/prophunt.log'
     if os.path.exists(log_path):
