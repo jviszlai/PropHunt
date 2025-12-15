@@ -13,10 +13,11 @@ from multiprocessing import Pool
 import random
 import string
 import subprocess
+import time
 import z3
 
-SOLVER = "/home/viszlai/slurm/loandra/loandra"
-TMP_FILE = "/home/viszlai/tmp/ambiguous_global2.wdimacs"
+SOLVER = "/usr/src/prop_hunt/prop_hunt/loandra"
+TMP_FILE = "/tmp/ambiguous_global.wdimacs"
 TIMEOUT = 3 * 60
 
 
@@ -43,7 +44,7 @@ def _generate_xor(var_list: list[z3.BoolRef]) -> z3.BoolRef:
         )
 
 
-def _solve_maxsat(wdimacs: str, timeout: int, new_tmp_file: str = None) -> str:
+def _solve_maxsat(wdimacs: str, timeout: int, new_tmp_file: str = None, solve_times: list[int] = []) -> str:
     """
     Makes an external call to loandra to solve a MaxSAT problem in wdimacs format
 
@@ -57,9 +58,11 @@ def _solve_maxsat(wdimacs: str, timeout: int, new_tmp_file: str = None) -> str:
     Returns:
         Variable assignments output by solver
     """
+
     use_tmp_file = TMP_FILE if not new_tmp_file else new_tmp_file
     with open(use_tmp_file, "w") as f:
         f.write(wdimacs)
+    start_time = time.time()
     if timeout == None:
         out_str: str = subprocess.run(
             f"{SOLVER} -print-model {use_tmp_file}",
@@ -74,6 +77,8 @@ def _solve_maxsat(wdimacs: str, timeout: int, new_tmp_file: str = None) -> str:
             text=True,
             shell=True,
         ).stdout
+    end_time = time.time()
+    solve_times.append(end_time - start_time)
     os.remove(use_tmp_file)
     return parse.parse("{}\nv {}", out_str)[1][:-1]
 
@@ -84,6 +89,7 @@ def _find_logical_error(
     obs_list: list[LogicalOperator],
     timeout: int,
     new_tmp_file: str = None,
+    solve_times: list[int] = []
 ) -> list[int]:
     """
     Finds a minimum weight logical error for a given circuit-level error subproblem
@@ -150,7 +156,7 @@ def _find_logical_error(
         else:
             wdimacs += f"h {line}\n"
 
-    assignments: str = _solve_maxsat(wdimacs, timeout, new_tmp_file)
+    assignments: str = _solve_maxsat(wdimacs, timeout, new_tmp_file, solve_times=solve_times)
     var_assignments: dict[str, bool] = {
         var: assignments[i - 1] == "1" for i, var in var_mapping.items()
     }
@@ -162,7 +168,7 @@ def _find_logical_error(
     return np.where(error_assignments)[0]
 
 
-def get_ambiguous_error(prop_graph: PropagationGraph, timeout: int = TIMEOUT):
+def get_ambiguous_error(prop_graph: PropagationGraph, timeout: int = TIMEOUT,):
     """
     Note: Not in use in PropHunt, but used for scaling analysis compared to global solver
 
@@ -265,7 +271,8 @@ def _sample_ambiguous_errors(args) -> list[np.ndarray]:
     weight_cap: int
     num_samples: int
     worker_idx: int
-    prop_graph, check_mat, obs_mat, weight_cap, num_samples, worker_idx = args
+    return_solve_times: bool
+    prop_graph, check_mat, obs_mat, weight_cap, num_samples, worker_idx, return_solve_times = args
     """
     Randomly samples ambiguous subgraphs and corresponding minimum weight logical errors.
     May be run on parallel threads, so numpy random seed must be regenerated
@@ -282,10 +289,11 @@ def _sample_ambiguous_errors(args) -> list[np.ndarray]:
         At most num_samples minimum weight logical errors corresponding to ambiguous subgraphs
     """
     ambiguous_errors: list[np.ndarray] = []
+    solve_times: list[int] = []
     error_map = prop_graph.generate_errors()
     error_list: list[TwoQubitError] = list(error_map.keys())
     tmp_file_hash: str = "".join(random.choice(string.ascii_letters) for _ in range(5))
-    new_tmp_file = f"/home/viszlai/tmp/ambiguous_{worker_idx}_{tmp_file_hash}.wdimacs"
+    new_tmp_file = f"/tmp/ambiguous_{worker_idx}_{tmp_file_hash}.wdimacs"
     for i in range(num_samples):
         np.random.seed()
         error_idx: list[int] = [np.random.randint(0, check_mat.shape[1])]
@@ -330,12 +338,14 @@ def _sample_ambiguous_errors(args) -> list[np.ndarray]:
                     obs_list.append(obs)
         reduced_error_list = list(reduced_error_map.keys())
         logical_error: list[int] = _find_logical_error(
-            reduced_error_map, list(check_list), obs_list, TIMEOUT, new_tmp_file
+            reduced_error_map, list(check_list), obs_list, TIMEOUT, new_tmp_file, solve_times=solve_times
         )
         ambiguous_errors.append(
             np.array([error_list.index(reduced_error_list[i]) for i in logical_error])
         )
 
+    if return_solve_times:
+        return ambiguous_errors, solve_times
     return ambiguous_errors
 
 
@@ -344,6 +354,7 @@ def error_sampler(
     weight_cap: int,
     num_samples: int = 500,
     num_workers: int = 4,
+    return_solve_times: bool = False,
 ):
     """
     Parallel sampling of ambiguous subgraphs and minimum weight logical errors
@@ -359,15 +370,24 @@ def error_sampler(
     Returns:
         At most num_samples minimum weight logical errors corresponding to ambiguous subgraphs
     """
+    solve_times = []
     check_mat, obs_mat = prop_graph.error_map_to_mats()
     samples_per_worker: int = num_samples // num_workers
     found_errors: list[np.ndarray] = []
     arg_list = [
-        (prop_graph, check_mat, obs_mat, weight_cap, samples_per_worker, i)
+        (prop_graph, check_mat, obs_mat, weight_cap, samples_per_worker, i, return_solve_times)
         for i in range(num_workers)
     ]
     with Pool(processes=num_workers) as pool:
         results = pool.map(_sample_ambiguous_errors, arg_list)
-        for ambiguous_errors in results:
-            found_errors.extend(ambiguous_errors)
-    return found_errors
+        if return_solve_times:
+            for ambiguous_errors, solve_times in results:
+                found_errors.extend(ambiguous_errors)
+                solve_times.extend(solve_times)
+        else:
+            for ambiguous_errors in results:
+                found_errors.extend(ambiguous_errors)
+    if return_solve_times:
+        return found_errors, solve_times
+    else:
+        return found_errors

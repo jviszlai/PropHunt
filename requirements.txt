@@ -11,5 +11,6 @@ qLDPC==0.2.6
 setuptools==80.9.0
 sinter==1.15.0
 stim==1.15.0
+stim-surface-code @ git+https://github.com/jasonchadwick/stim_surface_code@4d1d9eb00be746cce0500fd911a8c2f04d185fda
 sympy==1.14.0
 z3-solver==4.15.1.0
