@@ -151,9 +151,9 @@ if __name__ == '__main__':
                 out.append(func(x))
             return out
     
-    num_trials = 50
+    num_trials = 100
 
-    base_shots = 1000
+    base_shots = 20000
     device_size = 1200
     p_err=0.0045
     n_qubits = 2

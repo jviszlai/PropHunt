@@ -13,7 +13,7 @@ import pickle as pkl
 from mitiq import zne
 
 p_err=0.0045
-num_trials = 50
+num_trials = 100
 scale_factors = [1, 3, 5, 7]
 
 data_folder = 'data/zne'
